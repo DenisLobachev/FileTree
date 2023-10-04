@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     QVBoxLayout layout;
     layout.addWidget(&filterLineEdit);
     layout.addWidget(&treeView);
-\
+
     QWidget mainWindow;
     mainWindow.setLayout(&layout);
     mainWindow.show();
