@@ -1,0 +1,44 @@
+#include <QApplication>
+#include <QFileSystemModel>
+#include <QTreeView>
+#include <QDir>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include <QObject>
+
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
+
+    QString homePath = QDir::homePath();
+
+    QFileSystemModel model;
+    model.setRootPath(homePath);
+    model.setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
+
+    QTreeView treeView;
+    treeView.setModel(&model);
+    treeView.setRootIndex(model.index(homePath));
+
+    QLineEdit filterLineEdit;
+    filterLineEdit.setPlaceholderText("Фильтр по имени");
+
+    QVBoxLayout layout;
+    layout.addWidget(&filterLineEdit);
+    layout.addWidget(&treeView);
+\
+    QWidget mainWindow;
+    mainWindow.setLayout(&layout);
+    mainWindow.show();
+
+    QObject::connect(&filterLineEdit, &QLineEdit::textChanged, [&model, &treeView](const QString &text){
+        QModelIndex rootIndex = model.index(QDir::homePath());
+        for (int row = 0; row < model.rowCount(rootIndex); ++row) {
+            QModelIndex index = model.index(row, 0, rootIndex);
+            bool match = model.data(index, Qt::DisplayRole).toString().contains(text, Qt::CaseInsensitive);
+            treeView.setRowHidden(row, rootIndex, !match);
+        }
+    });
+
+    return app.exec();
+}
